@@ -238,7 +238,14 @@ class KinesisV2PartitionReader (schema: StructType,
                 && dataQueue.size() == 0
               ) {
                 // stop fetching if next dataQueue.poll returns null
-                lastEmptyCnt = Math.max(maxDataQueueEmptyCount - 1, 0)
+                // lastEmptyCnt = Math.max(maxDataQueueEmptyCount - 1, 0)
+                // as it is above (on the main repo) even setting maxDataQueueEmptyCount=1
+                // you will still start the loop once more, so if there is data sitll coming in,
+                // this will essentially never quit.
+                // if you have a high volume stream, you want to quit as soon as you have reached the end
+                // therefore:
+                fetchNext = false
+                // TODO: Move this to an option
               }
             }
             else {
